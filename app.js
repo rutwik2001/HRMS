@@ -21,6 +21,15 @@ moment().format();
 const app = express();
 
 app.set('view engine', 'ejs');
+const RateLimit = require('express-rate-limit');
+const limiter = new RateLimit({
+  windowMs: 1*60*1000, // 1 minute
+  max: 50,
+  message: "Please reach out after some time"
+});
+
+// apply rate limiter to all requests
+app.use(limiter);
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + "/public"));
