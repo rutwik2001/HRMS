@@ -202,7 +202,8 @@ const mainattendaceSchema = new mongoose.Schema({
   date: String,
   employee_email: String,
   atten: String,
-  m: Number
+  m: Number,
+  hours: Number
 })
 
 const Attendance = mongoose.model('attendance', attendaceSchema)
@@ -445,7 +446,7 @@ app.get("/employee_mc",checkAuthenticated,function(req,res){
 
 
 
-app.get("/request_leave", function (req, res) {
+app.get("/request_leave",checkAuthenticated, function (req, res) {
   let employee_email = _currentUser_.employee_email;
     Employee.find({employee_email},function(err, foundItems){
       res.render("request_leave", {foundItems: foundItems});
@@ -453,7 +454,7 @@ app.get("/request_leave", function (req, res) {
 })
 
 
-app.post("/request_leave", function (req, res) {
+app.post("/request_leave",checkAuthenticated, function (req, res) {
   var date = new Date();
   var m = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(date);
   var mon = date.getMonth()+1
@@ -479,7 +480,7 @@ app.post("/request_leave", function (req, res) {
   res.redirect("/request_leave");
 })
 
-app.get("/leave_status", function(req,res) {
+app.get("/leave_status",checkAuthenticated, function(req,res) {
   let employee_email = _currentUser_.employee_email;
   Employee.find({employee_email}, function(err, foundItems){
     Leave.find({employee_email}, function(err, leave_foundItems) {
@@ -547,10 +548,10 @@ Employee.find({employee_email},function(err, foundItems){
   });
 });
 
-app.get("/view_performance", function(req, res){
+app.get("/view_performance",checkAuthenticated, function(req, res){
     res.render("view_performance", {foundItems: [], performance_foundItems: []});
 })
-app.post("/view_performance", function (req, res) {
+app.post("/view_performance",checkAuthenticated, function (req, res) {
   let employee_email = req.body.employee_email;
 Employee.find({employee_email},function(err, foundItems){
   Performance.find({employee_email}, function(err, performance_foundItems){
@@ -561,10 +562,10 @@ Employee.find({employee_email},function(err, foundItems){
 
 
 
-app.get("/admin_payroll", function(req, res){
+app.get("/admin_payroll",checkAuthenticated, function(req, res){
   res.render("admin_payroll", {foundItems: [], mc_foundItems: [],ec_foundItems: [],lta_foundItems: [],leave_foundItems: []});
 })
-app.post("/admin_payroll", function(req, res){
+app.post("/admin_payroll",checkAuthenticated, function(req, res){
   let employee_email = req.body.employee_email;
   var date = new Date()
   var m = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(date);
@@ -590,7 +591,7 @@ app.post("/admin_payroll", function(req, res){
 
 })
 
-app.get("/employee_payroll", function(req, res){
+app.get("/employee_payroll",checkAuthenticated, function(req, res){
   let employee_email = _currentUser_.employee_email;
   var date = new Date()
   var m = new Intl.DateTimeFormat('en', { month: 'numeric' }).format(date);
@@ -616,7 +617,7 @@ app.get("/employee_payroll", function(req, res){
 
 })
 
-app.get("/admin_leaves", function (req, res) {
+app.get("/admin_leaves",checkAuthenticated, function (req, res) {
   let confirmation = "null";
   Leave.find({confirmation}, function (err, leave_foundItems){
     console.log(leave_foundItems);
@@ -625,7 +626,7 @@ app.get("/admin_leaves", function (req, res) {
 
 })
 
-app.post("/admin_leaves", function (req,res) {
+app.post("/admin_leaves",checkAuthenticated, function (req,res) {
   let confirmation = "null";
   let confo = req.body.confirmation;
   Leave.find({confirmation}, function (err, leave_foundItems){
@@ -651,7 +652,7 @@ app.post("/admin_leaves", function (req,res) {
   })
 })
 
-app.get("/captcha1", function (req, res) {
+app.get("/captcha1",checkAuthenticated, function (req, res) {
   Captcha.deleteMany({}, function (err) {
   if(err) console.log(err);
   console.log("Successful deletion");
@@ -675,7 +676,7 @@ app.get("/captcha1", function (req, res) {
 
 })
 
-app.post("/captcha1", function(req, res){
+app.post("/captcha1",checkAuthenticated, function(req, res){
   Captcha.find({}, function(err, foundItems){
     console.log(foundItems);
     if(req.body.code == '') {
@@ -708,7 +709,7 @@ app.post("/captcha1", function(req, res){
 
 
 
-app.get("/employee_attendance", function (req, res){
+app.get("/employee_attendance",checkAuthenticated, function (req, res){
   date = new Date()
   var mon = date.getMonth()+1
   date = date.getDate() + "-" + mon + "-" + date.getFullYear()
@@ -719,11 +720,11 @@ app.get("/employee_attendance", function (req, res){
 
 })
 
-app.get("/admin_attendance", function (req, res){
+app.get("/admin_attendance",checkAuthenticated, function (req, res){
   res.render("admin_attendance", {foundItems:[]})
 })
 
-app.post("/admin_attendance", function (req, res){
+app.post("/admin_attendance",checkAuthenticated, function (req, res){
   date = new Date()
   var mon = date.getMonth()+1
   date = date.getDate() + "-" + mon + "-" + date.getFullYear()
@@ -734,7 +735,7 @@ app.post("/admin_attendance", function (req, res){
 })
 
 
-app.get("/landing_page", function(req, res){
+app.get("/landing_page",checkNotAuthenticated, function(req, res){
   res.render("landing_page")
 })
 
@@ -787,11 +788,11 @@ app.post("/register", checkNotAuthenticated, async (req,res) => {
   }
 });
 
-app.get('/forgot', function(req, res) {
+app.get('/forgot',checkNotAuthenticated, function(req, res) {
   res.render('forgot');
 });
 
-app.post('/forgot', function(req, res, next) {
+app.post('/forgot',checkNotAuthenticated, function(req, res, next) {
   async.waterfall([
     function(done) {
       crypto.randomBytes(20, function(err, buf) {
@@ -844,7 +845,7 @@ app.post('/forgot', function(req, res, next) {
   });
 });
 
-app.get('/reset/:token', function(req, res) {
+app.get('/reset/:token',checkNotAuthenticated, function(req, res) {
   Employee.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
     if (!user) {
       req.flash('error', 'Password reset token is invalid or has expired.');
@@ -854,7 +855,7 @@ app.get('/reset/:token', function(req, res) {
   });
 });
 
-app.post('/reset/:token', function(req, res) {
+app.post('/reset/:token',checkNotAuthenticated, function(req, res) {
   async.waterfall([
     function(done) {
       Employee.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, async (err, user)=> {
@@ -1043,7 +1044,8 @@ app.delete('/logout', (req, res) => {
               date: yesterday,
               employee_email: employee.employee_email,
               atten: "Absent",
-              m: m
+              m: m,
+              hours: 0
             })
             main.save();
           }
@@ -1054,12 +1056,13 @@ app.delete('/logout', (req, res) => {
               k = k + user[i].hours
             }
 
-            if(k < 28800){
+            if(k < 180){
               let main = new MainAttendace({
                 date: yesterday,
                 employee_email: employee.employee_email,
                 atten: "Absent",
-                m: m
+                m: m,
+                hours: k
               })
               main.save();
 
@@ -1068,9 +1071,11 @@ app.delete('/logout', (req, res) => {
                 date: yesterday,
                 employee_email: employee.employee_email,
                 atten: "Present",
-                m: m
+                m: m,
+                hours: k
               })
               main.save();
+
             }
           }
 
@@ -1088,6 +1093,11 @@ app.delete('/logout', (req, res) => {
 
 
 
+    } else {
+      Attendance.deleteMany({date: yesterday, m: m}, function (err) {
+      if(err) console.log(err);
+      console.log("Successful deletion");
+    });
     }
   })
 
