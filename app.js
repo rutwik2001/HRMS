@@ -1138,7 +1138,7 @@ function checkNotAuthenticated(req, res, next) {
 
 
 
-const port = process.env.PORT || 8888
+const port = process.env.PORT || 3000
 app.listen(port, function() {
-  console.log("Server started on port 8888");
+  console.log("Server started on port 3000");
 })
